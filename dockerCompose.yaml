@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  openvpn2_ubuntu_test_openvpn2:
+    image: sha256:1671240565bc15f0a30d84fdd490ce5b67d5ff2ca622d6a7d54230edc1f8ebf0
+    container_name: openvpn2_ubuntu24_fsi
+    restart: unless-stopped
+    privileged: true
+    cap_add:
+      - CAP_SYS_ADMIN
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    ports:
+      - "1194:1194/udp"
+    dns:
+      - 10.0.0.2
+      - 1.1.1.1
+      - 1.1.2.2
+      - 4.4.4.4
+      - 8.8.8.8
+      - 8.8.4.4
+    volumes:
+      - "F:/Server backup_2025 _nginx_BIND/Openvpn/configs:/mnt"
+    networks:
+      - custom_net
+    sysctls:
+      net.ipv4.ip_forward: "1"
+
+networks:
+  custom_net:
+    external: true
+    name: 835004cb91ba
