@@ -2,5 +2,4 @@
 openvpn/
 *.key
 *.crt
-*.conf
 *.rar
