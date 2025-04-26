@@ -23,11 +23,11 @@ services:
     volumes:
       - "F:/Server backup_2025 _nginx_BIND/Openvpn/configs:/mnt"
     networks:
-      - custom_net
+      - a-class-bridge
     sysctls:
       net.ipv4.ip_forward: "1"
 
 networks:
-  custom_net:
+  a-class-bridge:
     external: true
-    name: 835004cb91ba
+    name: a-class-bridge
