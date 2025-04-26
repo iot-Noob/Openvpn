@@ -1,2 +1,6 @@
 *.zip
 openvpn/
+*.key
+*.crt
+*.conf
+*.rar
