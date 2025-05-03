@@ -38,30 +38,39 @@ RUN apt-get update && apt-get upgrade -y && \
     netcat-openbsd && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /var/log/* /tmp/*
-
+ENV EASYRSA_BATCH=1 \
+    EASYRSA_REQ_CN="myservername"
 # Create user and group
 RUN groupadd vpn && \
     useradd -m -s /bin/bash tkvpn && \
     usermod -aG vpn tkvpn
 
-# Copy OpenVPN configs
-COPY openvpn/ /etc/openvpn/
+RUN make-cadir /etc/openvpn/easy-rsa && \
+cd /etc/openvpn/easy-rsa && \
+./easyrsa init-pki && \
+./easyrsa build-ca nopass && \
+./easyrsa gen-req myservername nopass && \
+./easyrsa sign-req server myservername && \
+./easyrsa gen-dh && \
+./easyrsa gen-crl &&\
+cp pki/ca.crt pki/dh.pem pki/crl.pem pki/issued/myservername.crt pki/private/myservername.key /etc/openvpn/
+RUN cd /etc/openvpn && sudo openvpn --genkey secret ta.key
+COPY ./server.conf /etc/openvpn/
+COPY ./client.conf /etc/openvpn/
+# # Copy OpenVPN configs
+# COPY openvpn/ /etc/openvpn/
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 RUN dos2unix /start.sh
-# Set permissions
-RUN chmod 644 /etc/openvpn/*.crt && \
-    chmod 600 /etc/openvpn/*.key && \
-    chmod 600 /etc/openvpn/ta.key && \
-    chown -R tkvpn:vpn /etc/openvpn
+ 
 
 # Enable IP forwarding
 RUN echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
 
-## generate a new ta.key
-RUN cd /etc/openvpn && \
-    rm -f ta.key && \
-    openvpn --genkey --secret ta.key
+# ## generate a new ta.key
+# RUN cd /etc/openvpn && \
+#     rm -f ta.key && \
+#     openvpn --genkey --secret ta.key
 
 RUN mkdir -p /var/log/openvpn && \
     chown -R tkvpn:vpn /var/log/openvpn

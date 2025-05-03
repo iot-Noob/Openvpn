@@ -2,9 +2,11 @@ version: "3.9"
 
 services:
   
-  openvpn2_ubuntu_test_openvpn2:
-    image: sha256:1671240565bc15f0a30d84fdd490ce5b67d5ff2ca622d6a7d54230edc1f8ebf0
-    container_name: openvpn2_ubuntu24_fsi
+  openvpn2_secure_ubuntu_test_openvpn2:
+    build:
+      context: . 
+      dockerfile: Dockerfile
+    container_name: OpenvpnMSS
     restart: unless-stopped
     privileged: true
     cap_add:
