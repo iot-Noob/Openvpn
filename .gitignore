@@ -4,3 +4,5 @@ openvpn/
 *.crt
 *.rar
 openvpn2/
+*.srl
+*.csr
