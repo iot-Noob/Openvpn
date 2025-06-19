@@ -6,9 +6,10 @@ services:
     build:
       context: . 
       dockerfile: Dockerfile
-    container_name: OpenvpnMSS
+    container_name: OpenvpnSecure
     restart: unless-stopped
     privileged: true
+    image: talha/openvpn-secure:latest
     cap_add:
       - CAP_SYS_ADMIN
       - NET_ADMIN
@@ -17,7 +18,7 @@ services:
     ports:
       - "1194:1194/udp"
     dns:
-      - 10.0.0.2
+      - 192.168.100.33
       - 1.1.1.1
       - 1.1.2.2
       - 4.4.4.4
