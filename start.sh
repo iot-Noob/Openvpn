@@ -2,9 +2,11 @@
 
 set -e
 
-echo "Enabling IP forwarding..."
+CONFIG_DIR=/etc/openvpn
+EASYRSA_DIR=$CONFIG_DIR/easy-rsa
+HOSTNAME=${EASYRSA_REQ_CN:-myservername}
 
-# Try enabling IP forwarding, warn if it's read-only
+echo "Enabling IP forwarding..."
 if ! sysctl -w net.ipv4.ip_forward=1 2>/dev/null; then
     echo "Warning: Could not enable IP forwarding via sysctl (possibly read-only filesystem)"
 fi
@@ -20,12 +22,34 @@ iptables -A INPUT -i tun0 -j ACCEPT
 iptables -A FORWARD -i tun0 -o eth0 -j ACCEPT
 iptables -A FORWARD -i eth0 -o tun0 -m state --state RELATED,ESTABLISHED -j ACCEPT
 
+# Automatically generate certs if they do not exist
+if [ ! -f "$CONFIG_DIR/ca.crt" ]; then
+    echo "🔐 No certs found. Initializing PKI and generating OpenVPN certificates..."
+
+    make-cadir "$EASYRSA_DIR"
+    cd "$EASYRSA_DIR"
+    
+    ./easyrsa init-pki
+    ./easyrsa build-ca nopass
+    ./easyrsa gen-req "$HOSTNAME" nopass
+    ./easyrsa sign-req server "$HOSTNAME"
+    ./easyrsa gen-dh
+    ./easyrsa gen-crl
+    openvpn --genkey --secret "$CONFIG_DIR/ta.key"
+
+    cp pki/ca.crt pki/dh.pem pki/crl.pem \
+       pki/issued/"$HOSTNAME".crt \
+       pki/private/"$HOSTNAME".key "$CONFIG_DIR/"
+
+    echo "✅ Certificate generation complete and stored in: $CONFIG_DIR"
+fi
+
 # Start OpenVPN if config exists
-if [ -f /etc/openvpn/server.conf ]; then
+if [ -f "$CONFIG_DIR/server.conf" ]; then
     echo "Starting OpenVPN..."
-    exec openvpn --config /etc/openvpn/server.conf
+    exec openvpn --config "$CONFIG_DIR/server.conf"
 else
-    echo "ERROR: /etc/openvpn/server.conf not found!"
+    echo "❌ ERROR: $CONFIG_DIR/server.conf not found!"
     echo "Please ensure the config is correctly mounted to the container."
     exit 1
 fi

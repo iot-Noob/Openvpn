@@ -26,6 +26,7 @@ services:
       - 8.8.4.4
     volumes:
       - "F:/Server backup_2025 _nginx_BIND/Openvpn/configs:/mnt"
+      - "F:/Server backup_2025 _nginx_BIND/Openvpn/openvpn_cf:/etc/openvpn"
     networks:
       - a-class-bridge
     sysctls:

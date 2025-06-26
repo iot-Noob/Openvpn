@@ -45,18 +45,9 @@ RUN groupadd vpn && \
     useradd -m -s /bin/bash tkvpn && \
     usermod -aG vpn tkvpn
 
-RUN make-cadir /etc/openvpn/easy-rsa && \
-cd /etc/openvpn/easy-rsa && \
-./easyrsa init-pki && \
-./easyrsa build-ca nopass && \
-./easyrsa gen-req myservername nopass && \
-./easyrsa sign-req server myservername && \
-./easyrsa gen-dh && \
-./easyrsa gen-crl &&\
-cp pki/ca.crt pki/dh.pem pki/crl.pem pki/issued/myservername.crt pki/private/myservername.key /etc/openvpn/
+ 
 RUN cd /etc/openvpn && sudo openvpn --genkey secret ta.key
-COPY ./server.conf /etc/openvpn/
-COPY ./client.conf /etc/openvpn/
+ 
 # # Copy OpenVPN configs
 # COPY openvpn/ /etc/openvpn/
 COPY start.sh /start.sh

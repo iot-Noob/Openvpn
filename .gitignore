@@ -6,3 +6,4 @@ openvpn/
 openvpn2/
 *.srl
 *.csr
+/openvpn_cf/*
