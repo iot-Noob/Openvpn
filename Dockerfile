@@ -45,9 +45,7 @@ RUN groupadd vpn && \
     useradd -m -s /bin/bash tkvpn && \
     usermod -aG vpn tkvpn
 
- 
-RUN cd /etc/openvpn && sudo openvpn --genkey secret ta.key
- 
+
 # # Copy OpenVPN configs
 # COPY openvpn/ /etc/openvpn/
 COPY start.sh /start.sh
